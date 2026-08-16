@@ -2,6 +2,8 @@
 
 Codex 风格的紧凑用量状态条（DSH web GUI 插件）。
 
+![预览](docs/screenshot.png)
+
 一个极简的单行 monospace 胶囊，钉在 GUI 右下角，实时显示：
 
 ```
