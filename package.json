@@ -1,6 +1,6 @@
 {
   "name": "dsh-codex-meter",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Codex-style compact meter for the DSH web GUI: a tiny status pill showing live token usage, session cost and remaining DeepSeek API balance.",
   "type": "module",
   "main": "lib/index.js",
