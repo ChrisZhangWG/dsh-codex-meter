@@ -1,0 +1,10 @@
+# Bundle patch layer for dsh-codex-meter.
+#
+# When installed with `dsh plugin --profile <name> add dsh-codex-meter` (or by
+# copying this package into a profile's node_modules and adding this insert to
+# the profile's cordis.patch.yml), the loader starts the host half and the web
+# client registry picks up the `dsh.client` declaration to serve
+# /plugins/codex-meter/client.js.
+- insert:
+    - id: codex-meter
+      name: dsh-codex-meter

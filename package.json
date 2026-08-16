@@ -1,0 +1,41 @@
+{
+  "name": "dsh-codex-meter",
+  "version": "1.0.0",
+  "description": "Codex-style compact meter for the DSH web GUI: a tiny status pill showing live token usage, session cost and remaining DeepSeek API balance.",
+  "type": "module",
+  "main": "lib/index.js",
+  "files": [
+    "lib",
+    "cordis.patch.yml",
+    "README.md"
+  ],
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "slots"
+      ]
+    }
+  },
+  "keywords": [
+    "dsh",
+    "deepseek",
+    "deepseek-harness",
+    "plugin",
+    "codex",
+    "meter",
+    "balance",
+    "tokens",
+    "cost",
+    "web"
+  ],
+  "license": "MIT"
+}
