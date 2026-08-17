@@ -1,27 +1,19 @@
 # dsh-codex-meter
 
-Codex 风格的紧凑用量状态条（DSH web GUI 插件）。
+DeepSeek API 用量监控插件（DSH web GUI）：原生 **Settings → Usage** 页面，实时显示账户余额与今日已消费。界面全部为英文。
 
-![预览](docs/screenshot.png)
+![Settings → Usage 页面](docs/settings-usage.png)
 
-一个极简的单行 monospace 胶囊，钉在 GUI 右下角，实时显示三项数据（英文标签）：
+## 功能
 
-```
-● S ¥0.52 · T ¥1.25 · B ¥1.07
-```
-
-| 段 | 含义 | 刷新 |
-| --- | --- | --- |
-| `●` | 状态点（绿=可用 / 红=错误） | — |
-| `S ¥0.52` | 本会话费用（宿主回放会话日志，按官方价格表计价，含峰谷） | 15s（窗口可见时） |
-| `T ¥1.25` | 今日已消费（配置平台 token 后为**官方数据**；否则 `≈` 本地估算） | 60s（随余额轮询） |
-| `B ¥1.07` | DeepSeek API 剩余余额（官方 `/user/balance`，实时准确） | 60s |
-
-特性：
-
-- 点击胶囊：打开 DeepSeek 平台用量页（查看用量明细 / 充值）
+- **Settings → Usage** 原生页面（设置 → 通用 → Usage），不再是右下角悬浮胶囊
+- 只显示两项数据，均为英文标签：
+  - `Account balance` — DeepSeek API 剩余余额（官方 `/user/balance`，实时准确）
+  - `Today` — 今日已消费（配置平台 token 后为**官方数据**；否则 `≈` 本地估算）
+- **不显示会话级费用**：Usage 页面刻意不包含 session 级指标
+- `View full usage on DeepSeek Platform` 按钮：打开 DeepSeek 平台用量页（明细 + 充值）
 - **窗口隐藏/最小化时暂停轮询**，恢复可见立即补刷；数值无变化时不触发重渲染
-- **平台 token 过期/失效时**，T 前显示黄色警示 `!`（`!T ≈¥X`），不会静默退回估算
+- **平台 token 过期/失效时**，Today 行标签变为 `Today (refresh needed)`，不会静默退回估算
 - 只使用 `--dsw-*` 主题变量，跟随浅色 / 深色模式与应用字号缩放
 - API Key 不出本机：浏览器只访问宿主本地路由
 
@@ -53,7 +45,7 @@ Codex 风格的紧凑用量状态条（DSH web GUI 插件）。
          name: dsh-codex-meter
    ```
 
-4. **完全重启 DSH Desktop**（退出再打开）。重启后右下角出现胶囊。
+4. **完全重启 DSH Desktop**（退出再打开）。重启后进入 **Settings → Usage** 查看。
 
 > 若用 CLI 版 `dsh web`：profile 自带完整 pnpm workspace，直接
 > `dsh plugin --profile web add dsh-codex-meter` 即可，无需手动接线。
@@ -70,23 +62,23 @@ Codex 风格的紧凑用量状态条（DSH web GUI 插件）。
   DEEPSEEK_PLATFORM_TOKEN: <token>
   ```
 
-  配置后 Today 显示官方精确数据；**token 会随平台会话过期**，失效时胶囊显示
-  黄色 `!` 提示并自动退回 `≈` 估算（数据落 `~/.dsh/storages/codex-meter-day.json`），
+  配置后 Today 显示官方精确数据；**token 会随平台会话过期**，失效时 Today 行显示
+  `Today (refresh needed)` 并自动退回 `≈` 估算（数据落 `~/.dsh/storages/codex-meter-day.json`），
   重新按上述步骤取新 token 即可恢复。
 
 ## 宿主路由
 
 | 路由 | 说明 |
 | --- | --- |
-| `GET /api/codex-meter/balance` | 余额 + 今日已消费（官方优先，估算兜底）+ `platformTokenStatus` |
-| `GET /api/codex-meter/session-cost?sessionId=` | 会话费用：日志回放计价（含安装前历史），实时记账兜底 |
+| `GET /api/codex-meter/balance` | 余额 + 今日已消费（官方优先，估算兜底）+ `platformTokenStatus`（Usage 页面使用） |
+| `GET /api/codex-meter/session-cost?sessionId=` | 会话费用：日志回放计价（宿主保留，Usage 页面不使用） |
 
 ## 开发
 
 ```sh
 git clone <fork>
 cd dsh-codex-meter
-# 改 lib/index.js（宿主）/ lib/client.js（浏览器胶囊）
+# 改 lib/index.js（宿主）/ lib/client.js（浏览器端 Usage 页面）
 # 同步到已安装副本并重启桌面端验证
 ```
 
