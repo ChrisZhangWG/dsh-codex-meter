@@ -1,11 +1,12 @@
 {
   "name": "dsh-codex-meter",
-  "version": "1.0.7",
-  "description": "Codex-style compact meter for the DSH web GUI: a tiny status pill showing live token usage, session cost and remaining DeepSeek API balance.",
+  "version": "1.1.0",
+  "description": "Native DSH Settings → Usage page for DeepSeek API: account balance, official today usage with ≈ fallback, official cost trend chart, observed balance changes, and live API activity.",
   "type": "module",
   "main": "lib/index.js",
   "files": [
     "lib",
+    "docs",
     "cordis.patch.yml",
     "README.md"
   ],

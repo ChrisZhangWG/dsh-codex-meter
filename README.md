@@ -1,21 +1,32 @@
 # dsh-codex-meter
 
-DeepSeek API 用量监控插件（DSH web GUI）：原生 **Settings → Usage** 页面，实时显示账户余额与今日已消费。界面全部为英文。
+DeepSeek API 用量监控插件（DSH web GUI）：原生 **Settings → Usage** 页面，实时显示账户余额、官方今日消费与月度趋势。界面全部为英文。
 
 ![Settings → Usage 页面](docs/settings-usage.png)
 
 ## 功能
 
 - **Settings → Usage** 原生页面（设置 → 通用 → Usage），不再是右下角悬浮胶囊
-- 只显示两项数据，均为英文标签：
+- **圆形仪表图标**：Settings 侧栏 Usage 入口使用自定义圆形仪表图标（非默认齿轮）
+- 数据项均为英文标签：
   - `Account balance` — DeepSeek API 剩余余额（官方 `/user/balance`，实时准确）
-  - `Today` — 今日已消费（配置平台 token 后为**官方数据**；否则 `≈` 本地估算）
-- **不显示会话级费用**：Usage 页面刻意不包含 session 级指标
+  - `Today` — 今日已消费（配置平台 token 后为**官方数据**；否则 `≈` 本地估算，估算值明确带 `≈` 前缀）
+  - `Last balance change` — 最近一次观测到的余额变动（含观测时间，`+`/`−` 带符号显示）
+- **Official cost trend** 官方费用趋势折线图：
+  - `7D` / `Month` 两个视图切换；**今天之后的日期会被过滤掉**（平台对本月剩余日期返回零值占位，不画进图里）
+  - **每个每日费用点都显示数据标签**（悬停还有 tooltip）
+  - 周期统计：`Total`（合计）/ `Daily avg`（日均）/ `Peak`（峰值）
+  - `Official daily records (N)` 可展开查看逐日官方明细
+- **API activity** 实时 API 活动状态：
+  - `Active` = 确有 llm/stream 模型请求在运行（显示进行中的调用数与已耗时）；`Idle` = 无模型 API 请求
+  - **工具执行、权限等待等不会被误报为活跃 API 调用**；Active 仅表示计费可能在进行中，最终费用以官方数据为准
+  - 活动状态轮询是**纯本地**的（1s 本地路由），不会产生额外的 DeepSeek 模型调用
+- **Remote access** 远程访问（Settings 内独立分区）：通过私有 Tailscale 网络从手机打开 DSH（`tailscale serve`，无公网 URL），支持配对链接、一键启停、Tailscale 一次性授权引导
 - `View full usage on DeepSeek Platform` 按钮：打开 DeepSeek 平台用量页（明细 + 充值）
 - **窗口隐藏/最小化时暂停轮询**，恢复可见立即补刷；数值无变化时不触发重渲染
 - **平台 token 过期/失效时**，Today 行标签变为 `Today (refresh needed)`，不会静默退回估算
 - 只使用 `--dsw-*` 主题变量，跟随浅色 / 深色模式与应用字号缩放
-- API Key 不出本机：浏览器只访问宿主本地路由
+- **密钥不出本机**：浏览器只访问宿主本地路由；仓库中不存储任何密钥值，也不会把密钥发送给浏览器
 
 ## 安装（桌面版手动方式）
 
@@ -53,25 +64,28 @@ DeepSeek API 用量监控插件（DSH web GUI）：原生 **Settings → Usage**
 ## 配置
 
 - 余额读取复用 `DEEPSEEK_API_KEY`（设置 → 模型，或 `~/.dsh/.credentials.yaml`）。
-- 「今日已消费」官方来源（推荐）：配置 `DEEPSEEK_PLATFORM_TOKEN`
-  （登录 platform.deepseek.com → DevTools → Console →
-  `JSON.parse(localStorage.getItem('userToken')).value`），
+- **官方数据需要 `DEEPSEEK_PLATFORM_TOKEN`**（趋势图、今日官方消费、逐日明细均来自官方接口）：
+  登录 platform.deepseek.com → DevTools → Console →
+  `JSON.parse(localStorage.getItem('userToken')).value`，
   存到 `~/.dsh/.credentials.yaml`：
 
   ```yaml
   DEEPSEEK_PLATFORM_TOKEN: <token>
   ```
 
-  配置后 Today 显示官方精确数据；**token 会随平台会话过期**，失效时 Today 行显示
+  配置后 Today / 趋势图显示官方精确数据；**token 会随平台会话过期**，失效时 Today 行显示
   `Today (refresh needed)` 并自动退回 `≈` 估算（数据落 `~/.dsh/storages/codex-meter-day.json`），
   重新按上述步骤取新 token 即可恢复。
+- 观测到的余额变动记录在 `~/.dsh/storages/codex-meter-balance-history.json`（运行期数据，不入库）。
 
 ## 宿主路由
 
 | 路由 | 说明 |
 | --- | --- |
-| `GET /api/codex-meter/balance` | 余额 + 今日已消费（官方优先，估算兜底）+ `platformTokenStatus`（Usage 页面使用） |
-| `GET /api/codex-meter/session-cost?sessionId=` | 会话费用：日志回放计价（宿主保留，Usage 页面不使用） |
+| `GET /api/codex-meter/balance` | 余额、官方月度用量历史（未来日期已过滤）、Today 来源/状态（official/estimate + token 状态）、观测到的余额变动（含时间戳） |
+| `GET /api/codex-meter/api-activity` | 仅非敏感的实时模型调用元数据（id/启动时间/provider/model/sessionId），无提示词、无密钥；工具执行与权限等待不计入 |
+| `GET /api/codex-meter/session-cost?sessionId=` | 会话费用：宿主按会话日志回放计价（**注意：这是本地估算，不是官方账户扣费记录**；Usage 页面不使用它） |
+| `GET/POST /api/codex-meter/remote-status` `/remote-enable` `/remote-disable` | Tailscale 远程访问状态/启停（启停仅接受本机回环请求） |
 
 ## 开发
 
