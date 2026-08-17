@@ -28,6 +28,17 @@ DeepSeek API 用量监控插件（DSH web GUI）：原生 **Settings → Usage**
 - 只使用 `--dsw-*` 主题变量，跟随浅色 / 深色模式与应用字号缩放
 - **密钥不出本机**：浏览器只访问宿主本地路由；仓库中不存储任何密钥值，也不会把密钥发送给浏览器
 
+## 用量缓存（Usage cache）
+
+打开 Settings → Usage 时，页面会先**立即显示最近一次成功获取的用量统计**，同时**并行拉取最新数据**，请求成功后替换显示；缓存存活 **7 天**。
+
+- **刷新期间**显示 `Showing saved data · refreshing…`
+- **刷新失败**时保留已有数据并显示 `Refresh failed · showing the last saved data.`
+- **只缓存展示型统计数据**：余额（balance）、今日消费（Today）、官方历史（usageHistory）与观测到的余额变动（balanceChanges）
+- **绝不缓存** `DEEPSEEK_PLATFORM_TOKEN`、API Key、凭据等任何密钥（缓存结构里没有这些字段）
+- **API activity 不缓存**：Active/Idle 始终来自实时活动接口 `/api/codex-meter/api-activity`
+- **首次打开**（无缓存）会等待一次真实请求，属预期行为
+
 ## 安装（桌面版手动方式）
 
 本插件按 DSH 标准 bundle 插件设计（`dsh.bundle.patch` + `dsh.client`），正常可用 `dsh plugin --profile <name> add dsh-codex-meter` 安装。**桌面版**（DSH Desktop 2.x）的手动接线方式：
