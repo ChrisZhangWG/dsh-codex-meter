@@ -55,7 +55,13 @@ DeepSeek API 用量监控插件（DSH web GUI）：原生 **Settings → Usage**
 
 ## 安装（桌面版手动方式）
 
-本插件按 DSH 标准 bundle 插件设计（`dsh.bundle.patch` + `dsh.client`），正常可用 `dsh plugin --profile <name> add dsh-codex-meter` 安装。**桌面版**（DSH Desktop 2.x）的手动接线方式：
+本插件按 DSH 标准 bundle 插件设计（`dsh.bundle.patch` + `dsh.client`）。在 npm 包正式发布前，请从 GitHub 安装：
+
+```sh
+dsh plugin --profile <name> add github:ChrisZhangWG/dsh-codex-meter
+```
+
+**桌面版**（DSH Desktop 2.x）的手动接线方式：
 
 1. 将本包放入 profile 的 node_modules：
 
@@ -84,7 +90,7 @@ DeepSeek API 用量监控插件（DSH web GUI）：原生 **Settings → Usage**
 4. **完全重启 DSH Desktop**（退出再打开）。重启后进入 **Settings → Usage** 查看。
 
 > 若用 CLI 版 `dsh web`：profile 自带完整 pnpm workspace，直接
-> `dsh plugin --profile web add dsh-codex-meter` 即可，无需手动接线。
+> `dsh plugin --profile web add github:ChrisZhangWG/dsh-codex-meter` 即可，无需手动接线。
 
 ## 配置
 
