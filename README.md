@@ -1,8 +1,14 @@
 # dsh-codex-meter
 
-DeepSeek API 用量监控插件（DSH web GUI）：原生 **Settings → Usage** 页面，实时显示账户余额、官方今日消费与月度趋势。界面全部为英文。
+DeepSeek API 用量监控插件（DSH web GUI）：原生 **Settings → Usage** 页面，实时显示账户余额、官方今日消费、Token 构成与月度趋势。界面全部为英文。
 
-![Settings → Usage 页面](docs/settings-usage.png)
+### Usage overview and token analysis
+
+![Settings → Usage overview and token analysis](docs/settings-usage-overview.png)
+
+### Cost breakdown, trend, and daily records
+
+![Settings → Usage cost breakdown and history](docs/settings-usage-cost-history.png)
 
 ## 功能
 
@@ -12,6 +18,14 @@ DeepSeek API 用量监控插件（DSH web GUI）：原生 **Settings → Usage**
   - `Account balance` — DeepSeek API 剩余余额（官方 `/user/balance`，实时准确）
   - `Today` — 今日已消费（配置平台 token 后为**官方数据**；否则 `≈` 本地估算，估算值明确带 `≈` 前缀）
   - `Last balance change` — 最近一次观测到的余额变动（含观测时间，`+`/`−` 带符号显示）
+- **Today's token analysis** 官方今日分析：
+  - 请求数、今日费用，以及 Cache efficiency / Context size 两条区间尺
+  - Cache efficiency：`Low <70%` / `Fair 70–90%` / `Healthy >90%`
+  - Context size：`Light <50K` / `Growing 50–100K` / `Heavy >100K`（按今日平均输入/请求）
+  - 组合生成今日整体趋势与行动建议，明确不将今日聚合值误称为当前 Session 的精确诊断
+  - Cache hit input / Cache miss input / Output 的 Token 与费用拆分折叠到 `Why did today cost …?`
+  - 可展开的小时级请求、Token 与官方费用记录
+  - 聚合所有 API Key 后再传给浏览器，不返回 API Key 名称或标识
 - **Official cost trend** 官方费用趋势折线图：
   - `7D` / `Month` 两个视图切换；**今天之后的日期会被过滤掉**（平台对本月剩余日期返回零值占位，不画进图里）
   - **每个每日费用点都显示数据标签**（悬停还有 tooltip）
@@ -34,7 +48,7 @@ DeepSeek API 用量监控插件（DSH web GUI）：原生 **Settings → Usage**
 
 - **刷新期间**显示 `Showing saved data · refreshing…`
 - **刷新失败**时保留已有数据并显示 `Refresh failed · showing the last saved data.`
-- **只缓存展示型统计数据**：余额（balance）、今日消费（Today）、官方历史（usageHistory）与观测到的余额变动（balanceChanges）
+- **只缓存展示型统计数据**：余额（balance）、今日消费（Today）、官方 Token 分析（todayAnalysis）、官方历史（usageHistory）与观测到的余额变动（balanceChanges）
 - **绝不缓存** `DEEPSEEK_PLATFORM_TOKEN`、API Key、凭据等任何密钥（缓存结构里没有这些字段）
 - **API activity 不缓存**：Active/Idle 始终来自实时活动接口 `/api/codex-meter/api-activity`
 - **首次打开**（无缓存）会等待一次真实请求，属预期行为
@@ -93,7 +107,7 @@ DeepSeek API 用量监控插件（DSH web GUI）：原生 **Settings → Usage**
 
 | 路由 | 说明 |
 | --- | --- |
-| `GET /api/codex-meter/balance` | 余额、官方月度用量历史（未来日期已过滤）、Today 来源/状态（official/estimate + token 状态）、观测到的余额变动（含时间戳） |
+| `GET /api/codex-meter/balance` | 余额、官方月度用量历史、Today 来源/状态、聚合且去除 API Key 标识的官方今日 Token/小时分析、观测到的余额变动 |
 | `GET /api/codex-meter/api-activity` | 仅非敏感的实时模型调用元数据（id/启动时间/provider/model/sessionId），无提示词、无密钥；工具执行与权限等待不计入 |
 | `GET /api/codex-meter/session-cost?sessionId=` | 会话费用：宿主按会话日志回放计价（**注意：这是本地估算，不是官方账户扣费记录**；Usage 页面不使用它） |
 | `GET/POST /api/codex-meter/remote-status` `/remote-enable` `/remote-disable` | Tailscale 远程访问状态/启停（启停仅接受本机回环请求） |
@@ -104,6 +118,7 @@ DeepSeek API 用量监控插件（DSH web GUI）：原生 **Settings → Usage**
 git clone <fork>
 cd dsh-codex-meter
 # 改 lib/index.js（宿主）/ lib/client.js（浏览器端 Usage 页面）
+npm test
 # 同步到已安装副本并重启桌面端验证
 ```
 

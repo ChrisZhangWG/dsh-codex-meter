@@ -1,9 +1,12 @@
 {
   "name": "dsh-codex-meter",
-  "version": "1.1.1",
-  "description": "Native DSH Settings → Usage page for DeepSeek API: account balance, official today usage with ≈ fallback, official cost trend chart, observed balance changes, and live API activity.",
+  "version": "1.2.1",
+  "description": "Native DSH Settings → Usage page for DeepSeek API: balance, official token and cost analysis, trends, context warnings, and live API activity.",
   "type": "module",
   "main": "lib/index.js",
+  "scripts": {
+    "test": "node --test"
+  },
   "files": [
     "lib",
     "docs",
