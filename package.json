@@ -18,6 +18,9 @@
     "./client": "./lib/client.js",
     "./package.json": "./package.json"
   },
+  "peerDependencies": {
+    "@deepseek-ai/dsh-credentials": ">=0.1.0-rc.6 <0.2.0-0"
+  },
   "dsh": {
     "bundle": {
       "patch": "./cordis.patch.yml"
