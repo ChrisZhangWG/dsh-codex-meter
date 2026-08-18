@@ -35,7 +35,6 @@ DeepSeek API 用量监控插件（DSH web GUI）：原生 **Settings → Usage**
   - `Active` = 确有 llm/stream 模型请求在运行（显示进行中的调用数与已耗时）；`Idle` = 无模型 API 请求
   - **工具执行、权限等待等不会被误报为活跃 API 调用**；Active 仅表示计费可能在进行中，最终费用以官方数据为准
   - 活动状态轮询是**纯本地**的（1s 本地路由），不会产生额外的 DeepSeek 模型调用
-- **Remote access** 远程访问（Settings 内独立分区）：通过私有 Tailscale 网络从手机打开 DSH（`tailscale serve`，无公网 URL），支持配对链接、一键启停、Tailscale 一次性授权引导
 - `View full usage on DeepSeek Platform` 按钮：打开 DeepSeek 平台用量页（明细 + 充值）
 - **窗口隐藏/最小化时暂停轮询**，恢复可见立即补刷；数值无变化时不触发重渲染
 - **平台 token 过期/失效时**，Today 行标签变为 `Today (refresh needed)`，不会静默退回估算
@@ -118,7 +117,6 @@ dsh plugin --profile <name> add dsh-codex-meter
 | `GET /api/codex-meter/balance` | 余额、官方月度用量历史、Today 来源/状态、聚合且去除 API Key 标识的官方今日 Token/小时分析、观测到的余额变动 |
 | `GET /api/codex-meter/api-activity` | 仅非敏感的实时模型调用元数据（id/启动时间/provider/model/sessionId），无提示词、无密钥；工具执行与权限等待不计入 |
 | `GET /api/codex-meter/session-cost?sessionId=` | 会话费用：宿主按会话日志回放计价（**注意：这是本地估算，不是官方账户扣费记录**；Usage 页面不使用它） |
-| `GET/POST /api/codex-meter/remote-status` `/remote-enable` `/remote-disable` | Tailscale 远程访问状态/启停（启停仅接受本机回环请求） |
 
 ## 开发
 
